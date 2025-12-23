@@ -2,16 +2,34 @@
 <html>
 <head>
     <title>{{ title }} | Online Learning, For Everyone</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
 </head>
 <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav mr-auto">
+                <a class="nav-item nav-link active" href="#">Home <span class="sr-only">(current)</span></a>
+                <a class="nav-item nav-link" href="#">My Courses</a>
+                <a class="nav-item nav-link" href="#">Placeholder</a>
+            </div>
+            <div class="navbar-nav ml-auto">
+                <a href="#" class="nav-item nav-link">Help</a>
+                <a href="#" class="nav-item nav-link">Settings</a>
+            </div>
+        </div>
+    </nav>
     <div class="App">
         <header class="App-header">
             <p>
                 Online learning, for everyone.
             </p>
             <p class="small">
-                Accessibility should be a feature, not an afterthought. We are built to ensure that everyone gets the equal access they deserve.
+                Accessibility should be a feature, not an afterthought.
             </p>
         </header>
     </div>
