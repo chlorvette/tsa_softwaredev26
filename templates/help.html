@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block content %}
+
+    <div class="content">
+        <div class="tab" role="tablist">
+        <button class="tabLinks active" role="tab" aria-selected="true" aria-controls="Started" id="tab-Started" onclick="openTab(event, 'Started')" id="defaultOpen">Getting Started</button>
+        <button class="tabLinks" role="tab" aria-selected="false" aria-controls="Shortcuts" id="tab-Shortcuts" onclick="openTab(event, 'Shortcuts')">Shortcuts</button>
+        <button class="tabLinks" role="tab" aria-selected="false" aria-controls="Troubleshooting" id="tab-Troubleshooting" onclick="openTab(event, 'Troubleshooting')">Troubleshooting</button>
+        </div>
+
+        <div id="Started" class="tabcontent" role="tabpanel" aria-labelledby="tab-Started">
+        <h3>Getting Started</h3>
+        <p>Follow these basics to get comfortable with the site.</p>
+        <ol>
+            <li>Sign in and confirm you can see your name in the top-right navigation.</li>
+            <li>Browse available courses from the Home page and open a course to view its outline.</li>
+            <li>Click "Start" on any lesson to launch it; progress saves automatically when you move to the next section.</li>
+        </ol>
+        </div>
+
+        <div id="Shortcuts" class="tabcontent" role="tabpanel" aria-labelledby="tab-Shortcuts" hidden>
+        <h3>Shortcuts</h3>
+        <ul>
+            <li>Use the top navigation bar to jump between Home, My Courses, Help, and Settings.</li>
+            <li>Inside a course, use the sidebar (if available) to hop directly to a specific lesson.</li>
+            <li>On any page, look for buttons labeled "Start", "Continue", or "Resume" to pick up where you left off.</li>
+        </ul> 
+        </div>
+
+        <div id="Troubleshooting" class="tabcontent" role="tabpanel" aria-labelledby="tab-Troubleshooting" hidden>
+        <h3>Troubleshooting</h3>
+        <ul>
+            <li>Refresh the page if content gets stuck or fails to load.</li>
+            <li>Try another browser or clear your cache if videos or images do not appear.</li>
+            <li>If progress is not saving, ensure you are signed in and your internet connection is stable.</li>
+            <li>Need more help? Email support@example.com with a brief description of the issue.</li>
+        </ul>
+        </div>
+
+        <script>
+        function openTab(evt, tabName) {
+            var i, tabContent, tabLinks;
+            
+            // Hide all tab contents
+            tabContent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabContent.length; i++) {
+                tabContent[i].hidden = true;
+            }
+            
+            // Remove active class and aria-selected from all tabs
+            tabLinks = document.querySelectorAll('[role="tab"]');
+            for (i = 0; i < tabLinks.length; i++) {
+                tabLinks[i].classList.remove("active");
+                tabLinks[i].setAttribute("aria-selected", "false");
+            }
+            
+            // Show current tab content
+            var tabPanel = document.getElementById(tabName);
+            tabPanel.hidden = false;
+            
+            // Set current tab as active
+            evt.currentTarget.classList.add("active");
+            evt.currentTarget.setAttribute("aria-selected", "true");
+            evt.currentTarget.focus();
+        }
+
+        // Keyboard navigation for tabs
+        document.querySelectorAll('[role="tab"]').forEach(function(tab) {
+            tab.addEventListener('keydown', function(e) {
+                var tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+                var currentIndex = tabs.indexOf(this);
+                var targetTab = null;
+
+                if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    targetTab = tabs[(currentIndex - 1 + tabs.length) % tabs.length];
+                } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    targetTab = tabs[(currentIndex + 1) % tabs.length];
+                } else if (e.key === 'Home') {
+                    e.preventDefault();
+                    targetTab = tabs[0];
+                } else if (e.key === 'End') {
+                    e.preventDefault();
+                    targetTab = tabs[tabs.length - 1];
+                }
+
+                if (targetTab) {
+                    targetTab.focus();
+                    var tabName = targetTab.getAttribute('aria-controls');
+                    openTab({currentTarget: targetTab}, tabName);
+                }
+            });
+        });
+
+        document.getElementById("defaultOpen").click();
+        </script>
+    </div>
+
+{% endblock %}

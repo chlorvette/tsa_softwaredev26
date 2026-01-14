@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ title }} | Online Learning, For Everyone</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav mr-auto">
+                <a class="nav-item nav-link {% if homeActive %}active{% endif %}" href="/">Home {% if homeActive %}<span class="sr-only">(current)</span>{% endif %}</a>
+                <a class="nav-item nav-link {% if myCoursesActive %}active{% endif %}" href="/my-courses">My Courses {% if myCoursesActive %}<span class="sr-only">(current)</span>{% endif %}</a>
+                <a class="nav-item nav-link {% if placeholderActive %}active{% endif %}" href="#">Placeholder {% if placeholderActive %}<span class="sr-only">(current)</span>{% endif %}</a>
+            </div>
+            <div class="navbar-nav ml-auto">
+                <a href="/help" class="nav-item nav-link {% if helpActive %}active{% endif %}">Help {% if helpActive %}<span class="sr-only">(current)</span>{% endif %}</a>
+                {% if loggedIn %}<a href="/settings" class="nav-item nav-link {% if settingsActive %}active{% endif %}">Settings {% if settingsActive %}<span class="sr-only">(current)</span>{% endif %}</a>{% endif %}
+                {% if current_user.is_authenticated %}
+                <span class="nav-item nav-link">{{ current_user.username }}</span>
+                <a href="/logout" class="nav-item nav-link">Logout</a>
+                {% else %}
+                <a href="/login" class="nav-item nav-link {% if loginActive %}active{% endif %}">Login</a>
+                <a href="/register" class="nav-item nav-link {% if registerActive %}active{% endif %}">Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    {% block content %}
+    {% endblock %}
+
+</body>
+
+</html>
