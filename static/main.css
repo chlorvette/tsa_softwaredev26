@@ -222,22 +222,22 @@ code {
 }
 
 html.dark-mode {
-    background-color: #1e1e1e;
+    background-color: #000000;
     color: #e0e0e0;
 }
 
 html.dark-mode body {
-    background-color: #1e1e1e;
+    background-color: #000000;
     color: #e0e0e0;
 }
 
 html.dark-mode .settings-section {
-    background-color: #2d2d2d;
-    border-color: #3d3d3d;
+    background-color: #1d1d1d;
+    border-color: #2b2b2b;
 }
 
 html.dark-mode .setting-item {
-    border-bottom-color: #3d3d3d;
+    border-bottom-color: #2b2b2b;
 }
 
 html.dark-mode .setting-item label {
@@ -249,8 +249,8 @@ html.dark-mode .settings-section h2 {
 }
 
 html.dark-mode .navbar {
-    background-color: #2d2d2d !important;
-    border-color: #3d3d3d;
+    background-color: #1d1d1d !important;
+    border-color: #2b2b2b;
 }
 
 html.dark-mode .navbar-light .navbar-nav .nav-link {
@@ -259,4 +259,37 @@ html.dark-mode .navbar-light .navbar-nav .nav-link {
 
 html.dark-mode .navbar-light .navbar-nav .nav-link:hover {
     color: #e0e0e0 !important;
+}
+
+html.dark-mode .App-header {
+    background-color: #000000;
+    color: #e0e0e0;
+}
+
+html.dark-mode .tab {
+    background-color: #1d1d1d;
+    border-color: #2b2b2b;
+}
+
+html.dark-mode .tab button {
+    color: #b0b0b0;
+}
+
+html.dark-mode .tab button:hover {
+    background-color: #2b2b2b;
+}
+
+html.dark-mode .tab button.active {
+    background-color: #2b2b2b;
+    color: #e0e0e0;
+}
+
+html.dark-mode .tabcontent {
+    background-color: #1d1d1d;
+    border-color: #2b2b2b;
+    color: #e0e0e0;
+}
+
+html.dark-mode .tabcontent h3 {
+    color: #e0e0e0;
 }
