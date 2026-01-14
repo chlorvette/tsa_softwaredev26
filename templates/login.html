@@ -9,12 +9,19 @@
                     <h2 class="card-title text-center mb-4">Login</h2>
                     
                     {% if error %}
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert" id="errorAlert">
                         {{ error }}
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close" onclick="document.getElementById('errorAlert').style.display='none';">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
+                    <script>
+                        document.getElementById('errorAlert').addEventListener('click', function(e) {
+                            if (e.target.classList.contains('close') || e.target.parentElement.classList.contains('close')) {
+                                this.style.display = 'none';
+                            }
+                        });
+                    </script>
                     {% endif %}
                     
                     <form method="POST">
