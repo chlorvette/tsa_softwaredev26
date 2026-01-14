@@ -47,6 +47,7 @@ def help():
 @app.route("/settings")
 def settings():
     return render_template("settings.html", title="Settings", settingsActive="active", loggedIn=current_user.is_authenticated)
+
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -103,10 +104,10 @@ def change_username():
     password = request.form.get('password')
     
     if not current_user.check_password(password):
-        return render_template('settings.html', title="Settings", error='Incorrect password'), 401
+        return render_template('settings.html', title="Settings", error='Incorrect password', settingsActive="active", loggedIn=current_user.is_authenticated), 401
     
     if User.query.filter_by(username=new_username).first():
-        return render_template('settings.html', title="Settings", error='Username already taken'), 400
+        return render_template('settings.html', title="Settings", error='Username already taken', settingsActive="active", loggedIn=current_user.is_authenticated), 400
     
     current_user.username = new_username
     db.session.commit()
