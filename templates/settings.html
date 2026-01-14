@@ -1,9 +1,187 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="page-content">
+<div class="settings-container">
     <h1>Settings</h1>
-    <p>Manage your account and preferences here.</p>
+    
+    <section class="settings-section">
+        <h2>Preferences</h2>
+        
+        <div class="setting-item">
+            <label for="darkModeToggle">Dark Mode</label>
+            <div class="toggle-switch">
+                <input type="checkbox" id="darkModeToggle" class="toggle-input">
+                <span class="toggle-slider"></span>
+            </div>
+        </div>
+        
+        <div class="setting-item">
+            <label for="fontSizeSlider">Font Size: <span id="fontSizeValue">16</span>px</label>
+            <input type="range" id="fontSizeSlider" class="slider" min="12" max="40" value="16" step="1">
+        </div>
+        
+        <div class="setting-item">
+            <label for="lineSpacingSlider">Line Spacing: <span id="lineSpacingValue">1.5</span></label>
+            <input type="range" id="lineSpacingSlider" class="slider" min="1" max="2.5" value="1.5" step="0.1">
+        </div>
+    </section>
+    
+    <section class="settings-section">
+        <h2>Account Settings</h2>
+        
+        <div class="setting-item">
+            <button class="btn btn-secondary" data-toggle="modal" data-target="#changeUsernameModal">Change Username</button>
+        </div>
+        
+        <div class="setting-item">
+            <button class="btn btn-secondary" data-toggle="modal" data-target="#changePasswordModal">Change Password</button>
+        </div>
+        
+        <div class="setting-item">
+            <button class="btn btn-danger" data-toggle="modal" data-target="#deleteAccountModal">Delete Account</button>
+        </div>
+    </section>
 </div>
+
+<div class="modal fade" id="changeUsernameModal" tabindex="-1" role="dialog" aria-labelledby="changeUsernameLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changeUsernameLabel">Change Username</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="POST" action="/change-username">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="newUsername">New Username</label>
+                        <input type="text" class="form-control" id="newUsername" name="new_username" placeholder="Enter new username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="usernamePassword">Password (for confirmation)</label>
+                        <input type="password" class="form-control" id="usernamePassword" name="password" placeholder="Enter your password" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Change Username</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog" aria-labelledby="changePasswordLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changePasswordLabel">Change Password</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="POST" action="/change-password">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="currentPassword">Current Password</label>
+                        <input type="password" class="form-control" id="currentPassword" name="current_password" placeholder="Enter current password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">New Password</label>
+                        <input type="password" class="form-control" id="newPassword" name="new_password" placeholder="Enter new password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm New Password</label>
+                        <input type="password" class="form-control" id="confirmPassword" name="confirm_password" placeholder="Confirm new password" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Change Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" role="dialog" aria-labelledby="deleteAccountLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteAccountLabel">Delete Account</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Warning:</strong> This action cannot be undone. All your data will be permanently deleted.</p>
+            </div>
+            <form method="POST" action="/delete-account">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="deletePassword">Enter your password to confirm deletion</label>
+                        <input type="password" class="form-control" id="deletePassword" name="password" placeholder="Enter your password" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
+
+<script>
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+    
+    if (savedDarkMode) {
+        darkModeToggle.checked = true;
+        document.documentElement.classList.add('dark-mode');
+    }
+    
+    darkModeToggle.addEventListener('change', function() {
+        if (this.checked) {
+            document.documentElement.classList.add('dark-mode');
+            localStorage.setItem('darkMode', 'true');
+        } else {
+            document.documentElement.classList.remove('dark-mode');
+            localStorage.setItem('darkMode', 'false');
+        }
+    });
+    
+    const fontSizeSlider = document.getElementById('fontSizeSlider');
+    const fontSizeValue = document.getElementById('fontSizeValue');
+    const savedFontSize = localStorage.getItem('fontSize') || '16';
+    
+    fontSizeSlider.value = savedFontSize;
+    fontSizeValue.textContent = savedFontSize;
+    document.body.style.fontSize = savedFontSize + 'px';
+    
+    fontSizeSlider.addEventListener('input', function() {
+        fontSizeValue.textContent = this.value;
+        document.body.style.fontSize = this.value + 'px';
+        localStorage.setItem('fontSize', this.value);
+    });
+    
+    const lineSpacingSlider = document.getElementById('lineSpacingSlider');
+    const lineSpacingValue = document.getElementById('lineSpacingValue');
+    const savedLineSpacing = localStorage.getItem('lineSpacing') || '1.5';
+    
+    lineSpacingSlider.value = savedLineSpacing;
+    lineSpacingValue.textContent = savedLineSpacing;
+    document.body.style.lineHeight = savedLineSpacing;
+    
+    lineSpacingSlider.addEventListener('input', function() {
+        lineSpacingValue.textContent = this.value;
+        document.body.style.lineHeight = this.value;
+        localStorage.setItem('lineSpacing', this.value);
+    });
+</script>
 
 {% endblock %}

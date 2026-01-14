@@ -41,30 +41,25 @@
         function openTab(evt, tabName) {
             var i, tabContent, tabLinks;
             
-            // Hide all tab contents
             tabContent = document.getElementsByClassName("tabcontent");
             for (i = 0; i < tabContent.length; i++) {
                 tabContent[i].hidden = true;
             }
             
-            // Remove active class and aria-selected from all tabs
             tabLinks = document.querySelectorAll('[role="tab"]');
             for (i = 0; i < tabLinks.length; i++) {
                 tabLinks[i].classList.remove("active");
                 tabLinks[i].setAttribute("aria-selected", "false");
             }
             
-            // Show current tab content
             var tabPanel = document.getElementById(tabName);
             tabPanel.hidden = false;
             
-            // Set current tab as active
             evt.currentTarget.classList.add("active");
             evt.currentTarget.setAttribute("aria-selected", "true");
             evt.currentTarget.focus();
         }
 
-        // Keyboard navigation for tabs
         document.querySelectorAll('[role="tab"]').forEach(function(tab) {
             tab.addEventListener('keydown', function(e) {
                 var tabs = Array.from(document.querySelectorAll('[role="tab"]'));

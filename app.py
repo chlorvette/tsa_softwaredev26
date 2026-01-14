@@ -96,6 +96,53 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
+@app.route("/change-username", methods=['POST'])
+@login_required
+def change_username():
+    new_username = request.form.get('new_username')
+    password = request.form.get('password')
+    
+    if not current_user.check_password(password):
+        return render_template('settings.html', title="Settings", error='Incorrect password'), 401
+    
+    if User.query.filter_by(username=new_username).first():
+        return render_template('settings.html', title="Settings", error='Username already taken'), 400
+    
+    current_user.username = new_username
+    db.session.commit()
+    return redirect(url_for('settings'))
+
+@app.route("/change-password", methods=['POST'])
+@login_required
+def change_password():
+    current_password = request.form.get('current_password')
+    new_password = request.form.get('new_password')
+    confirm_password = request.form.get('confirm_password')
+    
+    if not current_user.check_password(current_password):
+        return render_template('settings.html', title="Settings", error='Incorrect current password'), 401
+    
+    if new_password != confirm_password:
+        return render_template('settings.html', title="Settings", error='New passwords do not match'), 400
+    
+    current_user.set_password(new_password)
+    db.session.commit()
+    return redirect(url_for('settings'))
+
+@app.route("/delete-account", methods=['POST'])
+@login_required
+def delete_account():
+    password = request.form.get('password')
+    
+    if not current_user.check_password(password):
+        return render_template('settings.html', title="Settings", error='Incorrect password'), 401
+    
+    user_id = current_user.id
+    logout_user()
+    db.session.delete(User.query.get(user_id))
+    db.session.commit()
+    return redirect(url_for('home'))
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()

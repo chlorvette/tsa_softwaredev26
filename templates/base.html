@@ -5,6 +5,21 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <script>
+        (function() {
+            const darkMode = localStorage.getItem('darkMode') === 'true';
+            const fontSize = localStorage.getItem('fontSize') || '16';
+            const lineSpacing = localStorage.getItem('lineSpacing') || '1.5';
+            
+            if (darkMode) {
+                document.documentElement.classList.add('dark-mode');
+            }
+            
+            const multiplier = fontSize / 16;
+            document.documentElement.style.setProperty('--font-size-multiplier', multiplier);
+            document.documentElement.style.setProperty('--line-spacing', lineSpacing);
+        })();
+    </script>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
@@ -17,11 +32,15 @@
                 <a class="nav-item nav-link {% if myCoursesActive %}active{% endif %}" href="/my-courses">My Courses {% if myCoursesActive %}<span class="sr-only">(current)</span>{% endif %}</a>
                 <a class="nav-item nav-link {% if placeholderActive %}active{% endif %}" href="#">Placeholder {% if placeholderActive %}<span class="sr-only">(current)</span>{% endif %}</a>
             </div>
+            {% if current_user.is_authenticated %}
+            <div class="navbar-nav mx-auto">
+                <span class="nav-item nav-link">{{ current_user.username }}</span>
+            </div>
+            {% endif %}
             <div class="navbar-nav ml-auto">
                 <a href="/help" class="nav-item nav-link {% if helpActive %}active{% endif %}">Help {% if helpActive %}<span class="sr-only">(current)</span>{% endif %}</a>
                 {% if loggedIn %}<a href="/settings" class="nav-item nav-link {% if settingsActive %}active{% endif %}">Settings {% if settingsActive %}<span class="sr-only">(current)</span>{% endif %}</a>{% endif %}
                 {% if current_user.is_authenticated %}
-                <span class="nav-item nav-link">{{ current_user.username }}</span>
                 <a href="/logout" class="nav-item nav-link">Logout</a>
                 {% else %}
                 <a href="/login" class="nav-item nav-link {% if loginActive %}active{% endif %}">Login</a>
