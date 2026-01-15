@@ -16,6 +16,12 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
+courses = [
+    {'id': 1, 'title': 'Course 1', 'description': 'Description of Course 1'},
+    {'id': 2, 'title': 'Course 2', 'description': 'Description of Course 2'},
+    {'id': 3, 'title': 'Course 3', 'description': 'Description of Course 3'},
+    ]
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -51,6 +57,20 @@ def settings():
 @app.route("/my-courses")
 def my_courses():
     return render_template("my-courses.html", title="My Courses", myCoursesActive="active", loggedIn=current_user.is_authenticated)
+
+@app.route("/course/<int:course_id>/")
+def course_detail(course_id):
+    course = next((c for c in courses if c['id'] == course_id), None)
+    if not course:
+        return "Course not found", 404
+    
+    lessons = [
+        {'id': 1, 'title': 'Lesson 1'},
+        {'id': 2, 'title': 'Lesson 2'},
+        {'id': 3, 'title': 'Lesson 3'},
+    ]
+    
+    return render_template("course-detail.html", course=course, lessons=lessons, loggedIn=current_user.is_authenticated)
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
