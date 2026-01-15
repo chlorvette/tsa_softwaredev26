@@ -48,6 +48,10 @@ def help():
 def settings():
     return render_template("settings.html", title="Settings", settingsActive="active", loggedIn=current_user.is_authenticated)
 
+@app.route("/my-courses")
+def my_courses():
+    return render_template("my-courses.html", title="My Courses", myCoursesActive="active", loggedIn=current_user.is_authenticated)
+
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
