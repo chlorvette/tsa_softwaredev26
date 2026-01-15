@@ -293,3 +293,22 @@ html.dark-mode .tabcontent {
 html.dark-mode .tabcontent h3 {
     color: #e0e0e0;
 }
+
+.courses-box {
+    width: 330px;
+    height: 200px;
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin: 30px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+}
+
+.courses-container {
+    display: flex;          /* enables side-by-side layout */
+    flex-wrap: wrap;        /* allows boxes to move to next line on small screens */
+    gap: 20px;              /* spacing between boxes */
+    justify-content: flex-start; /* align to the left, can also use center or space-around */
+}
