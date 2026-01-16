@@ -20,6 +20,8 @@ courses = [
     {'id': 1, 'title': 'Course 1', 'description': 'Description of Course 1'},
     {'id': 2, 'title': 'Course 2', 'description': 'Description of Course 2'},
     {'id': 3, 'title': 'Course 3', 'description': 'Description of Course 3'},
+    {'id': 4, 'title': 'Course 4', 'description': 'Description of Course 4'},
+    {'id': 5, 'title': 'Course 5', 'description': 'Description of Course 5'}
     ]
 
 class User(UserMixin, db.Model):
