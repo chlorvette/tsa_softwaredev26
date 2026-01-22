@@ -135,53 +135,59 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
+<script src="{{ url_for('static', filename='apply-settings.js') }}"></script>
 
 <script>
-    const darkModeToggle = document.getElementById('darkModeToggle');
-    const savedDarkMode = localStorage.getItem('darkMode') === 'true';
     
-    if (savedDarkMode) {
-        darkModeToggle.checked = true;
-        document.documentElement.classList.add('dark-mode');
+    function initializeSettings() {
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const fontSizeSlider = document.getElementById('fontSizeSlider');
+        const fontSizeValue = document.getElementById('fontSizeValue');
+        const lineSpacingSlider = document.getElementById('lineSpacingSlider');
+        const lineSpacingValue = document.getElementById('lineSpacingValue');
+        
+        const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+        darkModeToggle.checked = savedDarkMode;
+        
+        const savedFontSize = localStorage.getItem('fontSize') || '16';
+        fontSizeSlider.value = savedFontSize;
+        fontSizeValue.textContent = savedFontSize;
+        
+        const savedLineSpacing = localStorage.getItem('lineSpacing') || '1.5';
+        lineSpacingSlider.value = savedLineSpacing;
+        lineSpacingValue.textContent = savedLineSpacing;
+        
+        darkModeToggle.addEventListener('change', function() {
+            if (this.checked) {
+                document.documentElement.classList.add('dark-mode');
+                localStorage.setItem('darkMode', 'true');
+            } else {
+                document.documentElement.classList.remove('dark-mode');
+                localStorage.setItem('darkMode', 'false');
+            }
+        });
+        
+        fontSizeSlider.addEventListener('input', function() {
+            fontSizeValue.textContent = this.value;
+            const multiplier = this.value / 16;
+            document.documentElement.style.setProperty('--font-size-multiplier', multiplier, 'important');
+            document.body.style.setProperty('--font-size-multiplier', multiplier, 'important');
+            localStorage.setItem('fontSize', this.value);
+        });
+        
+        lineSpacingSlider.addEventListener('input', function() {
+            lineSpacingValue.textContent = this.value;
+            document.documentElement.style.setProperty('--line-spacing', this.value, 'important');
+            document.body.style.setProperty('--line-spacing', this.value, 'important');
+            localStorage.setItem('lineSpacing', this.value);
+        });
     }
     
-    darkModeToggle.addEventListener('change', function() {
-        if (this.checked) {
-            document.documentElement.classList.add('dark-mode');
-            localStorage.setItem('darkMode', 'true');
-        } else {
-            document.documentElement.classList.remove('dark-mode');
-            localStorage.setItem('darkMode', 'false');
-        }
-    });
-    
-    const fontSizeSlider = document.getElementById('fontSizeSlider');
-    const fontSizeValue = document.getElementById('fontSizeValue');
-    const savedFontSize = localStorage.getItem('fontSize') || '16';
-    
-    fontSizeSlider.value = savedFontSize;
-    fontSizeValue.textContent = savedFontSize;
-    document.body.style.fontSize = savedFontSize + 'px';
-    
-    fontSizeSlider.addEventListener('input', function() {
-        fontSizeValue.textContent = this.value;
-        document.body.style.fontSize = this.value + 'px';
-        localStorage.setItem('fontSize', this.value);
-    });
-    
-    const lineSpacingSlider = document.getElementById('lineSpacingSlider');
-    const lineSpacingValue = document.getElementById('lineSpacingValue');
-    const savedLineSpacing = localStorage.getItem('lineSpacing') || '1.5';
-    
-    lineSpacingSlider.value = savedLineSpacing;
-    lineSpacingValue.textContent = savedLineSpacing;
-    document.body.style.lineHeight = savedLineSpacing;
-    
-    lineSpacingSlider.addEventListener('input', function() {
-        lineSpacingValue.textContent = this.value;
-        document.body.style.lineHeight = this.value;
-        localStorage.setItem('lineSpacing', this.value);
-    });
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeSettings);
+    } else {
+        initializeSettings();
+    }
 </script>
 
 {% endblock %}
