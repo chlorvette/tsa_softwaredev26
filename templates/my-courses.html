@@ -30,6 +30,7 @@
             <div class="navbar-nav mr-auto">
                 <a class="nav-item nav-link {% if homeActive %}active{% endif %}" href="/">Home {% if homeActive %}<span class="sr-only">(current)</span>{% endif %}</a>
                 <a class="nav-item nav-link {% if myCoursesActive %}active{% endif %}" href="/my-courses">My Courses {% if myCoursesActive %}<span class="sr-only">(current)</span>{% endif %}</a>
+                <a class="nav-item nav-link {% if placeholderActive %}active{% endif %}" href="#">Placeholder {% if placeholderActive %}<span class="sr-only">(current)</span>{% endif %}</a>
             </div>
             {% if current_user.is_authenticated %}
             <div class="navbar-nav mx-auto">
@@ -51,32 +52,32 @@
 
     <div class="courses-container">
         <article class="courses-box">
-            <h2>Course 1</h2>
-            <p>Description of Course 1</p>
+            <h2>Algebra 1 Basics</h2>
+            <p>This course covers the fundamentals of Algebra 1, including variables, equations, and functions.</p>
             <a href="/course/1">Start course</a>
         </article>
 
         <article class="courses-box">
-            <h2>Course 2</h2>
-            <p>Description of Course 2</p>
+            <h2>Intro to Earth Science</h2>
+            <p>This course introduces basic concepts of Earth Science and explores the interactions between Earth's systems.</p>
             <a href="/course/2">Start course</a>
         </article>
 
         <article class="courses-box">
-            <h2>Course 3</h2>
-            <p>Description of Course 3</p>
+            <h2>Analyzing Poetry</h2>
+            <p>This course focuses on the techniques and methods used to analyze poetry. It will cover themes, structure, and literary devices.</p>
             <a href="/course/3">Start course</a>
         </article>
 
         <article class="courses-box">
-            <h2>Course 4</h2>
-            <p>Description of Course 4</p>
+            <h2>Exploring Biology</h2>
+            <p>This course explores the fundamental concepts of biology and explores cell structure, genetics, and ecosystems.</p>
             <a href="/course/4">Start course</a>
         </article>
 
         <article class="courses-box">
-            <h2>Course 5</h2>
-            <p>Description of Course 5</p>
+            <h2>The American Revolution</h2>
+            <p>This course explores the causes, key events, and consequences of the American Revolution.</p>
             <a href="/course/5">Start course</a>
         </article>
     </div>

@@ -17,11 +17,11 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 courses = [
-    {'id': 1, 'title': 'Course 1', 'description': 'Description of Course 1'},
-    {'id': 2, 'title': 'Course 2', 'description': 'Description of Course 2'},
-    {'id': 3, 'title': 'Course 3', 'description': 'Description of Course 3'},
-    {'id': 4, 'title': 'Course 4', 'description': 'Description of Course 4'},
-    {'id': 5, 'title': 'Course 5', 'description': 'Description of Course 5'}
+    {'id': 1, 'title': 'Algebra 1 Basics', 'subject': 'Math', 'description': 'This course covers the fundamentals of Algebra 1, including variables, equations, and functions.'},
+    {'id': 2, 'title': 'Introduction to Earth Science', 'subject': 'Science', 'description': 'This course introduces the basic concepts of Earth Science, including geology, meteorology, and oceanography and explores the interactions between Earth\'s systems.'},
+    {'id': 3, 'title': 'Analyzing Poetry', 'subject': 'English', 'description': 'This course focuses on the techniques and methods used to analyze poetry. It will cover themes, structure, and literary devices.'},
+    {'id': 4, 'title': 'Exploring Biology', 'subject': 'Science', 'description': 'This course explores the fundamental concepts of biology and explores cell structure, genetics, and ecosystems.'},
+    {'id': 5, 'title': 'The American Revolution', 'subject': 'History', 'description': 'This course explores the causes and consequences of the American Revolution.'}
     ]
 
 class User(UserMixin, db.Model):
