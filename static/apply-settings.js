@@ -10,12 +10,16 @@
         const fontSize = localStorage.getItem('fontSize') || '16';
         const multiplier = fontSize / 16;
         document.documentElement.style.setProperty('--font-size-multiplier', multiplier, 'important');
-        
-        document.body.style.setProperty('--font-size-multiplier', multiplier, 'important');
+
+        if (document.body) {
+            document.body.style.setProperty('--font-size-multiplier', multiplier, 'important');
+        }
         
         const lineSpacing = localStorage.getItem('lineSpacing') || '1.5';
         document.documentElement.style.setProperty('--line-spacing', lineSpacing, 'important');
-        document.body.style.setProperty('--line-spacing', lineSpacing, 'important');
+        if (document.body) {
+            document.body.style.setProperty('--line-spacing', lineSpacing, 'important');
+        }
     }
     
     applySettings();

@@ -1,7 +1,8 @@
-from flask import Flask, render_template, redirect, url_for, request, session
+from flask import Flask, render_template, redirect, url_for, request, session, jsonify
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy import inspect, text
 from dotenv import load_dotenv
 import os
 
@@ -66,6 +67,9 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
+    dark_mode = db.Column(db.Boolean, nullable=False, default=False)
+    font_size = db.Column(db.Integer, nullable=False, default=16)
+    line_spacing = db.Column(db.Float, nullable=False, default=1.5)
     
     def set_password(self, password):
         self.password = generate_password_hash(password)
@@ -99,7 +103,28 @@ def seed_course_data():
 
 def initialize_database():
     db.create_all()
+    ensure_user_preference_columns()
     seed_course_data()
+
+
+def ensure_user_preference_columns():
+    inspector = inspect(db.engine)
+    existing_columns = {column['name'] for column in inspector.get_columns('user')}
+    migrations = []
+
+    if 'dark_mode' not in existing_columns:
+        migrations.append('ALTER TABLE user ADD COLUMN dark_mode BOOLEAN NOT NULL DEFAULT 0')
+    if 'font_size' not in existing_columns:
+        migrations.append('ALTER TABLE user ADD COLUMN font_size INTEGER NOT NULL DEFAULT 16')
+    if 'line_spacing' not in existing_columns:
+        migrations.append('ALTER TABLE user ADD COLUMN line_spacing FLOAT NOT NULL DEFAULT 1.5')
+
+    if not migrations:
+        return
+
+    with db.engine.begin() as connection:
+        for migration in migrations:
+            connection.execute(text(migration))
 
 @app.before_request
 def init_db():
@@ -126,6 +151,44 @@ def help():
 @app.route("/settings")
 def settings():
     return render_template("settings.html", title="Settings", settingsActive="active", loggedIn=current_user.is_authenticated)
+
+
+@app.route('/api/preferences', methods=['GET'])
+@login_required
+def get_preferences():
+    return jsonify({
+        'darkMode': bool(current_user.dark_mode),
+        'fontSize': int(current_user.font_size),
+        'lineSpacing': float(current_user.line_spacing),
+    })
+
+
+@app.route('/api/preferences', methods=['POST'])
+@login_required
+def save_preferences():
+    data = request.get_json(silent=True) or {}
+
+    dark_mode = bool(data.get('darkMode', current_user.dark_mode))
+
+    try:
+        font_size = int(data.get('fontSize', current_user.font_size))
+    except (TypeError, ValueError):
+        font_size = current_user.font_size
+
+    try:
+        line_spacing = float(data.get('lineSpacing', current_user.line_spacing))
+    except (TypeError, ValueError):
+        line_spacing = current_user.line_spacing
+
+    font_size = max(12, min(40, font_size))
+    line_spacing = max(1.0, min(4.0, line_spacing))
+
+    current_user.dark_mode = dark_mode
+    current_user.font_size = font_size
+    current_user.line_spacing = line_spacing
+    db.session.commit()
+
+    return jsonify({'success': True})
 
 @app.route("/my-courses")
 def my_courses():
@@ -185,8 +248,26 @@ def register():
     return render_template('register.html', registerActive="active", loggedIn=current_user.is_authenticated)
 
 @app.route("/logout")
-@login_required
 def logout():
+    complete_logout_url = url_for('complete_logout')
+    return f"""
+<!DOCTYPE html>
+<html>
+<head><title>Logging out...</title></head>
+<body>
+<script>
+    localStorage.removeItem('darkMode');
+    localStorage.removeItem('fontSize');
+    localStorage.removeItem('lineSpacing');
+    window.location.replace('{complete_logout_url}');
+</script>
+</body>
+</html>
+"""
+
+
+@app.route("/logout/complete")
+def complete_logout():
     logout_user()
     return redirect(url_for('home'))
 
@@ -232,12 +313,11 @@ def delete_account():
         return render_template('settings.html', title="Settings", error='Incorrect password'), 401
     
     user_id = current_user.id
-    logout_user()
     user = db.session.get(User, user_id)
     if user:
         db.session.delete(user)
     db.session.commit()
-    return redirect(url_for('home'))
+    return redirect(url_for('logout'))
 
 if __name__ == '__main__':
     with app.app_context():
