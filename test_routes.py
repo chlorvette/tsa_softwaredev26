@@ -8,7 +8,7 @@ def client():
         yield client
 
 def test_all_routes(client):
-    urls = ['/', '/my-courses', '/course/1/', '/course/2/', '/course/3/', '/course/4/', '/login', '/help', '/register']
+    urls = ['/', '/my-courses', '/course/1/', '/course/2/', '/course/3/', '/course/4/', '/course/5/', '/login', '/help', '/register']
     
     for url in urls:
         response = client.get(url)
