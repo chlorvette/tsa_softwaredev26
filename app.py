@@ -16,13 +16,50 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-courses = [
-    {'id': 1, 'title': 'Algebra 1 Basics', 'subject': 'Math', 'description': 'This course covers the fundamentals of Algebra 1, including variables, equations, and functions.'},
-    {'id': 2, 'title': 'Introduction to Earth Science', 'subject': 'Science', 'description': 'This course introduces the basic concepts of Earth Science, including geology, meteorology, and oceanography and explores the interactions between Earth\'s systems.'},
-    {'id': 3, 'title': 'Analyzing Poetry', 'subject': 'English', 'description': 'This course focuses on the techniques and methods used to analyze poetry. It will cover themes, structure, and literary devices.'},
-    {'id': 4, 'title': 'Exploring Biology', 'subject': 'Science', 'description': 'This course explores the fundamental concepts of biology and explores cell structure, genetics, and ecosystems.'},
-    {'id': 5, 'title': 'The American Revolution', 'subject': 'History', 'description': 'This course explores the causes and consequences of the American Revolution.'}
-    ]
+initial_course_data = [
+    {
+        'title': 'Algebra 1 Basics',
+        'subject': 'Math',
+        'description': 'This course covers the fundamentals of Algebra 1, including variables, equations, and functions.',
+    },
+    {
+        'title': 'Introduction to Earth Science',
+        'subject': 'Science',
+        'description': "This course introduces the basic concepts of Earth Science, including geology, meteorology, and oceanography and explores the interactions between Earth's systems.",
+    },
+    {
+        'title': 'Analyzing Poetry',
+        'subject': 'English',
+        'description': 'This course focuses on the techniques and methods used to analyze poetry. It will cover themes, structure, and literary devices.',
+    },
+    {
+        'title': 'Exploring Biology',
+        'subject': 'Science',
+        'description': 'This course explores the fundamental concepts of biology and explores cell structure, genetics, and ecosystems.',
+    },
+    {
+        'title': 'The American Revolution',
+        'subject': 'History',
+        'description': 'This course explores the causes and consequences of the American Revolution.',
+    },
+]
+
+initial_lesson_titles = ['Lesson 1', 'Lesson 2', 'Lesson 3']
+
+
+class Course(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    subject = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    lessons = db.relationship('Lesson', backref='course', lazy=True, cascade='all, delete-orphan')
+
+
+class Lesson(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    lesson_order = db.Column(db.Integer, nullable=False, default=1)
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -38,11 +75,45 @@ class User(UserMixin, db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
+
+
+def seed_course_data():
+    if Course.query.count() > 0:
+        return
+
+    for course_data in initial_course_data:
+        course = Course(
+            title=course_data['title'],
+            subject=course_data['subject'],
+            description=course_data['description'],
+        )
+        db.session.add(course)
+        db.session.flush()
+
+        for index, lesson_title in enumerate(initial_lesson_titles, start=1):
+            db.session.add(Lesson(title=lesson_title, lesson_order=index, course_id=course.id))
+
+    db.session.commit()
+
+
+def initialize_database():
+    db.create_all()
+    seed_course_data()
 
 @app.before_request
 def init_db():
-    db.create_all()
+    if app.config.get('DB_INITIALIZED'):
+        return
+
+    initialize_database()
+    app.config['DB_INITIALIZED'] = True
+
+
+@app.context_processor
+def inject_courses():
+    courses = Course.query.order_by(Course.id).all()
+    return {'courses': courses}
 
 @app.route("/")
 def home():
@@ -62,16 +133,12 @@ def my_courses():
 
 @app.route("/course/<int:course_id>/")
 def course_detail(course_id):
-    course = next((c for c in courses if c['id'] == course_id), None)
+    course = db.session.get(Course, course_id)
     if not course:
         return "Course not found", 404
-    
-    lessons = [
-        {'id': 1, 'title': 'Lesson 1'},
-        {'id': 2, 'title': 'Lesson 2'},
-        {'id': 3, 'title': 'Lesson 3'},
-    ]
-    
+
+    lessons = Lesson.query.filter_by(course_id=course.id).order_by(Lesson.lesson_order).all()
+
     return render_template("course-detail.html", course=course, lessons=lessons, loggedIn=current_user.is_authenticated)
 
 @app.route("/login", methods=['GET', 'POST'])
@@ -166,11 +233,13 @@ def delete_account():
     
     user_id = current_user.id
     logout_user()
-    db.session.delete(User.query.get(user_id))
+    user = db.session.get(User, user_id)
+    if user:
+        db.session.delete(user)
     db.session.commit()
     return redirect(url_for('home'))
 
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()
+        initialize_database()
     app.run(debug=True)
