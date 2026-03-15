@@ -306,6 +306,10 @@ html.dark-mode .sidebar {
 }
 
 html.dark-mode .courses-box {
+    font-size: calc(16px * var(--font-size-multiplier));
+    line-height: var(--line-spacing);
+    color: inherit; /* makes dark-mode text color apply */
+
     background-color: #1d1d1d;
     border-color: #2b2b2b;
     color: #e0e0e0;
