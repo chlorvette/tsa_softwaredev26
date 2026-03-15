@@ -16,51 +16,21 @@
             </ul>
         </aside>
 
-        <main class="course-content">
-            <h1>{{ course.title }}</h1>
-            <h5>Subject: {{ course.subject }}</h5>
-            <p>{{ course.description }}</p>
-            <br>
-            <h4 id="section-1-1">Section 1.1</h4>
-            <p>The content for section 1.1 will be here. </p>
-            <br>
-            <br>
-            <h4 id="section-1-2">Section 1.2</h4>
-            <p>The content for section 1.2 will be here. </p>
-            <br>
-            <br>
-            <h4 id="section-1-3">Section 1.3</h4>
-            <p>The content for section 1.3 will be here. </p>
-            <br>
-            <br>
-            <h4 id="section-2-1">Section 2.1</h4>
-            <p>The content for section 2.1 will be here. </p>
-            <br>
-            <br>
-            <h4 id="section-2-2">Section 2.2</h4>
-            <p>The content for section 2.2 will be here. </p>
-            <br>
-            <br>
-            <h4 id="section-3-1">Section 3.1</h4>
-            <p>The content for section 3.1 will be here. </p>
-            <br>
-            <br>
-            <h4 id="section-3-2">Section 3.2</h4>
-            <p>The content for section 3.2 will be here. </p>
-            <br>
-            <br>
-            <h4 id="section-3-3">Section 3.3</h4>
-            <p>The content for section 3.3 will be here. </p>
-            <br>
-            <br>
-            <h4 id="section-3-4">Section 3.4</h4>
-            <p>The content for section 3.4 will be here. </p>
-            <br>
-            <br>
-        </main>
-    </div>
+    <main class="course-content">
+        <h1>{{ course.title }}</h1>
+        <h5>Subject: {{ course.subject }}</h5>
+        <p>{{ course.description }}</p>
+        <br>
+
+        {% for lesson in lessons %}
+        <h4 id="lesson-{{ lesson.id }}">{{ lesson.title }}</h4>
+        <p>Lesson content coming soon.</p>
+        <br>
+        <br>
+        {% endfor %}
+    </main>
+</div>
 
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhp5yYlrN+pWnprRDqV01aVZrK+fLMXf63QJektPvCZ" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
-
-    {% endblock %}
+{% endblock %}

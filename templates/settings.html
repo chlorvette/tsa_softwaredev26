@@ -138,24 +138,71 @@
 <script src="{{ url_for('static', filename='apply-settings.js') }}"></script>
 
 <script>
-    
-    function initializeSettings() {
+    async function initializeSettings() {
         const darkModeToggle = document.getElementById('darkModeToggle');
         const fontSizeSlider = document.getElementById('fontSizeSlider');
         const fontSizeValue = document.getElementById('fontSizeValue');
         const lineSpacingSlider = document.getElementById('lineSpacingSlider');
         const lineSpacingValue = document.getElementById('lineSpacingValue');
-        
-        const savedDarkMode = localStorage.getItem('darkMode') === 'true';
-        darkModeToggle.checked = savedDarkMode;
-        
-        const savedFontSize = localStorage.getItem('fontSize') || '16';
-        fontSizeSlider.value = savedFontSize;
-        fontSizeValue.textContent = savedFontSize;
-        
-        const savedLineSpacing = localStorage.getItem('lineSpacing') || '1.5';
-        lineSpacingSlider.value = savedLineSpacing;
-        lineSpacingValue.textContent = savedLineSpacing;
+
+        const isLoggedIn = document.body.dataset.loggedIn === 'true';
+
+        async function savePreferences(preferences) {
+            if (!isLoggedIn) {
+                return;
+            }
+
+            await fetch('/api/preferences', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(preferences)
+            });
+        }
+
+        function applyPreferenceValues(darkMode, fontSize, lineSpacing) {
+            darkModeToggle.checked = darkMode;
+            if (darkMode) {
+                document.documentElement.classList.add('dark-mode');
+            } else {
+                document.documentElement.classList.remove('dark-mode');
+            }
+
+            fontSizeSlider.value = String(fontSize);
+            fontSizeValue.textContent = String(fontSize);
+            const multiplier = fontSize / 16;
+            document.documentElement.style.setProperty('--font-size-multiplier', multiplier, 'important');
+            document.body.style.setProperty('--font-size-multiplier', multiplier, 'important');
+
+            lineSpacingSlider.value = String(lineSpacing);
+            lineSpacingValue.textContent = String(lineSpacing);
+            document.documentElement.style.setProperty('--line-spacing', String(lineSpacing), 'important');
+            document.body.style.setProperty('--line-spacing', String(lineSpacing), 'important');
+        }
+
+        let darkMode = localStorage.getItem('darkMode') === 'true';
+        let fontSize = parseInt(localStorage.getItem('fontSize') || '16', 10);
+        let lineSpacing = parseFloat(localStorage.getItem('lineSpacing') || '1.5');
+
+        if (isLoggedIn) {
+            try {
+                const response = await fetch('/api/preferences');
+                if (response.ok) {
+                    const serverPreferences = await response.json();
+                    darkMode = !!serverPreferences.darkMode;
+                    fontSize = parseInt(serverPreferences.fontSize, 10) || 16;
+                    lineSpacing = parseFloat(serverPreferences.lineSpacing) || 1.5;
+                }
+            } catch (error) {
+                console.error('Failed to load account preferences', error);
+            }
+        }
+
+        localStorage.setItem('darkMode', darkMode ? 'true' : 'false');
+        localStorage.setItem('fontSize', String(fontSize));
+        localStorage.setItem('lineSpacing', String(lineSpacing));
+        applyPreferenceValues(darkMode, fontSize, lineSpacing);
         
         darkModeToggle.addEventListener('change', function() {
             if (this.checked) {
@@ -165,6 +212,12 @@
                 document.documentElement.classList.remove('dark-mode');
                 localStorage.setItem('darkMode', 'false');
             }
+
+            savePreferences({
+                darkMode: this.checked,
+                fontSize: parseInt(fontSizeSlider.value, 10),
+                lineSpacing: parseFloat(lineSpacingSlider.value)
+            });
         });
         
         fontSizeSlider.addEventListener('input', function() {
@@ -173,6 +226,12 @@
             document.documentElement.style.setProperty('--font-size-multiplier', multiplier, 'important');
             document.body.style.setProperty('--font-size-multiplier', multiplier, 'important');
             localStorage.setItem('fontSize', this.value);
+
+            savePreferences({
+                darkMode: darkModeToggle.checked,
+                fontSize: parseInt(this.value, 10),
+                lineSpacing: parseFloat(lineSpacingSlider.value)
+            });
         });
         
         lineSpacingSlider.addEventListener('input', function() {
@@ -180,6 +239,12 @@
             document.documentElement.style.setProperty('--line-spacing', this.value, 'important');
             document.body.style.setProperty('--line-spacing', this.value, 'important');
             localStorage.setItem('lineSpacing', this.value);
+
+            savePreferences({
+                darkMode: darkModeToggle.checked,
+                fontSize: parseInt(fontSizeSlider.value, 10),
+                lineSpacing: parseFloat(this.value)
+            });
         });
     }
     

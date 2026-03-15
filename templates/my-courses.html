@@ -1,35 +1,14 @@
 {% extends "base.html" %}
-
 {% block content %}
+
 <div class="courses-container">
+    {% for course in courses %}
     <article class="courses-box">
-        <h2>Algebra 1 Basics</h2>
-        <p>This course covers the fundamentals of Algebra 1, including variables, equations, and functions.</p>
-        <a href="/course/1">Start course</a>
+        <h2>{{ course.title }}</h2>
+        <p>{{ course.description }}</p>
+        <a href="{{ url_for('course_detail', course_id=course.id) }}">Start course</a>
     </article>
-
-    <article class="courses-box">
-        <h2>Intro to Earth Science</h2>
-        <p>This course introduces basic concepts of Earth Science and explores the interactions between Earth's systems.</p>
-        <a href="/course/2">Start course</a>
-    </article>
-
-    <article class="courses-box">
-        <h2>Analyzing Poetry</h2>
-        <p>This course focuses on the techniques and methods used to analyze poetry. It will cover themes, structure, and literary devices.</p>
-        <a href="/course/3">Start course</a>
-    </article>
-
-    <article class="courses-box">
-        <h2>Exploring Biology</h2>
-        <p>This course explores the fundamental concepts of biology and explores cell structure, genetics, and ecosystems.</p>
-        <a href="/course/4">Start course</a>
-    </article>
-
-    <article class="courses-box">
-        <h2>The American Revolution</h2>
-        <p>This course explores the causes, key events, and consequences of the American Revolution.</p>
-        <a href="/course/5">Start course</a>
-    </article>
+    {% endfor %}
 </div>
+
 {% endblock %}
