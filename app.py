@@ -26,7 +26,7 @@ initial_course_data = [
     {
         'title': 'Introduction to Earth Science',
         'subject': 'Science',
-        'description': "This course introduces the basic concepts of Earth Science, including geology, meteorology, and oceanography and explores the interactions between Earth's systems.",
+        'description': "This course introduces the basic concepts of Earth Science, including geology and oceanography by exploring interactions between Earth's systems.",
     },
     {
         'title': 'Analyzing Poetry',

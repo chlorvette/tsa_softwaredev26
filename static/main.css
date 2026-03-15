@@ -539,7 +539,7 @@ html.dark-mode .tabcontent h3 {
 
 .courses-box {
     width: calc(350px * var(--font-size-multiplier));
-    height: calc(240px * var(--font-size-multiplier));
+    height: calc(260px * var(--font-size-multiplier));
     border: 1px solid #ccc;
     padding: calc(15px * var(--font-size-multiplier));
     margin: calc(30px * var(--font-size-multiplier));
