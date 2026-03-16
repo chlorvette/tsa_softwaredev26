@@ -28,6 +28,7 @@
             <div class="navbar-nav mr-auto">
                 <a class="nav-item nav-link {% if homeActive %}active{% endif %}" href="/">Home {% if homeActive %}<span class="sr-only">(current)</span>{% endif %}</a>
                 <a class="nav-item nav-link {% if myCoursesActive %}active{% endif %}" href="/my-courses">My Courses {% if myCoursesActive %}<span class="sr-only">(current)</span>{% endif %}</a>
+                <a class="nav-item nav-link {% if awardsActive %}active{% endif %}" href="/awards">Awards {% if awardsActive %}<span class="sr-only">(current)</span>{% endif %}</a>
             </div>
             {% if current_user.is_authenticated %}
             <div class="navbar-nav mx-auto">
