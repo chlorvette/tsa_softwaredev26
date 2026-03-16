@@ -565,3 +565,49 @@ html.dark-mode .tabcontent h3 {
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     box-sizing: border-box;
 }
+
+.awards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 25px;
+  justify-items: center;
+  margin-top: 30px;
+  padding: 0 20px;
+}
+
+.award {
+  text-align: center;
+  opacity: 0.3; /* greyed out by default */
+  border: 2px solid #ccc;
+  padding: 30px;
+  border-radius: 12px;
+  transition: opacity 0.3s, transform 0.2s, border-color 0.2s;
+  width: 220px;
+  min-height: 200px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.award img {
+  width: 200px;
+  height: auto;
+  margin-bottom: 10px;
+}
+
+.award p {
+  font-weight: bold;
+  font-size: 14px;
+  margin: 0;
+}
+
+.award.earned {
+  opacity: 1; /* fully visible if earned */
+  border-color: #f1c40f; /* gold border */
+}
+
+.award.earned:hover {
+  transform: scale(1.1);
+}

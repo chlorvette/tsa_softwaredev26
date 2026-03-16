@@ -47,6 +47,29 @@ initial_course_data = [
 
 initial_lesson_titles = ['Lesson 1', 'Lesson 2', 'Lesson 3']
 
+initial_achievement_data = [
+    {
+        "name": "Finished First Course",
+        "description": "Completed your first course!",
+        "image_url": "images/awards/first_course.png"
+    },
+    {
+        "name": "First Dark Mode",
+        "description": "Used dark mode for the first time!",
+        "image_url": "images/awards/first_dark_mode.png"
+    },
+    {
+        "name": "First Font Size Change",
+        "description": "Changed font size for the first time!",
+        "image_url": "images/awards/first_font_size.png"
+    },
+    {
+        "name": "First Line Spacing Change",
+        "description": "Changed line spacing for the first time!",
+        "image_url": "images/awards/first_line_spacing.png"
+    }
+]
+
 
 class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -76,6 +99,19 @@ class User(UserMixin, db.Model):
     
     def check_password(self, password):
         return check_password_hash(self.password, password)
+    
+# For achievements and awards
+class Achievement(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(255))
+    image_url = db.Column(db.String(255))
+
+class UserAchievement(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    achievement_id = db.Column(db.Integer, db.ForeignKey('achievement.id'), nullable=False)
+    earned = db.Column(db.Boolean, default=False)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -100,11 +136,26 @@ def seed_course_data():
 
     db.session.commit()
 
+def seed_achievement_data():
+    if Achievement.query.count() > 0:
+        return
+
+    for achievement_data in initial_achievement_data:
+        achievement = Achievement(
+            name=achievement_data["name"],
+            description=achievement_data["description"],
+            image_url=achievement_data["image_url"]
+        )
+        db.session.add(achievement)
+
+    db.session.commit()
+
 
 def initialize_database():
     db.create_all()
     ensure_user_preference_columns()
     seed_course_data()
+    seed_achievement_data()
 
 
 def ensure_user_preference_columns():
@@ -152,6 +203,25 @@ def help():
 def settings():
     return render_template("settings.html", title="Settings", settingsActive="active", loggedIn=current_user.is_authenticated)
 
+@app.route("/awards")
+@login_required
+def awards():
+    achievements = db.session.query(
+        Achievement.id,  # explicitly select id
+        Achievement.name,
+        Achievement.description,  # explicitly select description
+        Achievement.image_url,
+        UserAchievement.earned
+    ).outerjoin(
+        UserAchievement, 
+        (UserAchievement.achievement_id == Achievement.id) & (UserAchievement.user_id == current_user.id)
+    ).all()
+
+    achievements_list = [
+        {"name": a.name, "description": a.description, "image_url": a.image_url, "earned": bool(a.earned)}
+        for a in achievements
+    ]
+    return render_template("awards.html", achievements=achievements_list, loggedIn=current_user.is_authenticated, awardsActive="active", title="Awards")
 
 @app.route('/api/preferences', methods=['GET'])
 @login_required
@@ -162,6 +232,27 @@ def get_preferences():
         'lineSpacing': float(current_user.line_spacing),
     })
 
+@app.route("/complete-course/<int:course_id>", methods=["POST"])
+@login_required
+def complete_course(course_id):
+    achievement = Achievement.query.filter_by(name="Finished First Course").first()
+
+    if achievement:
+        existing = UserAchievement.query.filter_by(
+            user_id=current_user.id,
+            achievement_id=achievement.id
+        ).first()
+
+        if not existing:
+            new_award = UserAchievement(
+                user_id=current_user.id,
+                achievement_id=achievement.id,
+                earned=True
+            )
+            db.session.add(new_award)
+            db.session.commit()
+
+    return redirect(url_for("course_detail", course_id=course_id))
 
 @app.route('/api/preferences', methods=['POST'])
 @login_required
@@ -182,6 +273,60 @@ def save_preferences():
 
     font_size = max(12, min(40, font_size))
     line_spacing = max(1.0, min(4.0, line_spacing))
+
+    # For "First Dark Mode" achievement
+    if not current_user.dark_mode and dark_mode:
+        achievement = Achievement.query.filter_by(name="First Dark Mode").first()
+        if achievement:
+            existing = UserAchievement.query.filter_by(
+                user_id=current_user.id,
+                achievement_id=achievement.id
+            ).first()
+
+        if not existing:
+            new_award = UserAchievement(
+                user_id=current_user.id,
+                achievement_id=achievement.id,
+                earned=True
+            )
+            db.session.add(new_award)
+            db.session.commit()
+
+    # For "First Font Size Change" achievement
+    if current_user.font_size != font_size:
+        achievement = Achievement.query.filter_by(name="First Font Size Change").first()
+        if achievement:
+            existing = UserAchievement.query.filter_by(
+                user_id=current_user.id,
+                achievement_id=achievement.id
+            ).first()
+
+        if not existing:
+            new_award = UserAchievement(
+                user_id=current_user.id,
+                achievement_id=achievement.id,
+                earned=True
+            )
+            db.session.add(new_award)
+            db.session.commit()
+
+    # For "First Line Spacing Change" achievement
+    if current_user.line_spacing != line_spacing:
+        achievement = Achievement.query.filter_by(name="First Line Spacing Change").first()
+        if achievement:
+            existing = UserAchievement.query.filter_by(
+                user_id=current_user.id,
+                achievement_id=achievement.id
+            ).first()
+
+        if not existing:
+            new_award = UserAchievement(
+                user_id=current_user.id,
+                achievement_id=achievement.id,
+                earned=True
+            )
+            db.session.add(new_award)
+            db.session.commit()
 
     current_user.dark_mode = dark_mode
     current_user.font_size = font_size
