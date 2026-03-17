@@ -24,7 +24,7 @@ initial_course_data = [
         'description': 'This course covers the fundamentals of Algebra 1, including variables, equations, and functions.',
     },
     {
-        'title': 'Introduction to Earth Science',
+        'title': 'Intro to Earth Science',
         'subject': 'Science',
         'description': "This course introduces the basic concepts of Earth Science, including geology and oceanography by exploring interactions between Earth's systems.",
     },
@@ -100,7 +100,7 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password, password)
     
-# For achievements and awards
+# For achievements and awards tracking
 class Achievement(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -112,6 +112,19 @@ class UserAchievement(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     achievement_id = db.Column(db.Integer, db.ForeignKey('achievement.id'), nullable=False)
     earned = db.Column(db.Boolean, default=False)
+
+# For tracking course and lesson progress
+class LessonProgress(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    lesson_id = db.Column(db.Integer, db.ForeignKey('lesson.id'), nullable=False)
+    completed = db.Column(db.Boolean, default=False)
+
+class CourseProgress(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
+    completed = db.Column(db.Boolean, default=False)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -235,6 +248,22 @@ def get_preferences():
 @app.route("/complete-course/<int:course_id>", methods=["POST"])
 @login_required
 def complete_course(course_id):
+
+    progress = CourseProgress.query.filter_by(
+        user_id=current_user.id,
+        course_id=course_id
+    ).first()
+
+    if not progress:
+        progress = CourseProgress(
+            user_id=current_user.id,
+            course_id=course_id,
+            completed=True
+        )
+        db.session.add(progress)
+    else:
+        progress.completed = True
+
     achievement = Achievement.query.filter_by(name="Finished First Course").first()
 
     if achievement:
@@ -250,7 +279,8 @@ def complete_course(course_id):
                 earned=True
             )
             db.session.add(new_award)
-            db.session.commit()
+
+    db.session.commit()
 
     return redirect(url_for("course_detail", course_id=course_id))
 
@@ -337,17 +367,76 @@ def save_preferences():
 
 @app.route("/my-courses")
 def my_courses():
-    return render_template("my-courses.html", title="My Courses", myCoursesActive="active", loggedIn=current_user.is_authenticated)
+    courses = Course.query.all()
 
+    if current_user.is_authenticated:
+        completed_courses = {
+            cp.course_id for cp in CourseProgress.query.filter_by(
+                user_id=current_user.id,
+                completed=True
+            ).all()
+        }
+    else:
+        completed_courses = set()
+
+    return render_template(
+        "my-courses.html",
+        courses=courses,
+        completed_courses=completed_courses,
+        loggedIn=current_user.is_authenticated
+    )
 @app.route("/course/<int:course_id>/")
 def course_detail(course_id):
     course = db.session.get(Course, course_id)
-    if not course:
-        return "Course not found", 404
+    lessons = Lesson.query.filter_by(course_id=course.id)\
+        .order_by(Lesson.lesson_order).all()
 
-    lessons = Lesson.query.filter_by(course_id=course.id).order_by(Lesson.lesson_order).all()
+    progress_percent = 0
 
-    return render_template("course-detail.html", course=course, lessons=lessons, loggedIn=current_user.is_authenticated)
+    if current_user.is_authenticated:
+        completed_lessons = LessonProgress.query.filter_by(
+            user_id=current_user.id,
+            completed=True
+        ).join(Lesson).filter(Lesson.course_id == course.id).count()
+
+        total_lessons = len(lessons)
+
+        if total_lessons > 0:
+            progress_percent = int((completed_lessons / total_lessons) * 100)
+
+        if CourseProgress.query.filter_by(user_id=current_user.id, course_id=course.id, completed=True).first():
+            progress_percent = 100
+
+    return render_template(
+        "course-detail.html",
+        course=course,
+        lessons=lessons,
+        progress_percent=progress_percent,
+        loggedIn=current_user.is_authenticated
+    )
+@app.route("/complete-lesson/<int:lesson_id>", methods=["POST"])
+@login_required
+def complete_lesson(lesson_id):
+    progress = LessonProgress.query.filter_by(
+        user_id=current_user.id,
+        lesson_id=lesson_id
+    ).first()
+
+    if not progress:
+        progress = LessonProgress(
+            user_id=current_user.id,
+            lesson_id=lesson_id,
+            completed=True
+        )
+        db.session.add(progress)
+    else:
+        progress.completed = True
+
+    db.session.commit()
+
+    lesson = db.session.get(Lesson, lesson_id)
+
+    return redirect(url_for("course_detail", course_id=lesson.course_id))
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():

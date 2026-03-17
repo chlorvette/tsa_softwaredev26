@@ -242,6 +242,10 @@ html.dark-mode .settings-section {
     border-color: #2b2b2b;
 }
 
+html.dark-mode .btn {
+    color: #ffffff; /* white text on all buttons */
+}
+
 html.dark-mode .setting-item {
     border-bottom-color: #2b2b2b;
 }
