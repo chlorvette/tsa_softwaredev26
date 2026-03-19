@@ -8,15 +8,18 @@ import os
 
 load_dotenv()
 
+# App setup
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-key-change-in-production')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 
+# Database and login setup
 db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
+# Course data for db
 initial_course_data = [
     {
         'title': 'Algebra 1 Basics',
@@ -45,8 +48,10 @@ initial_course_data = [
     },
 ]
 
+# Lessons within each course
 initial_lesson_titles = ['Lesson 1', 'Lesson 2', 'Lesson 3']
 
+# Achievement data for awards page
 initial_achievement_data = [
     {
         "name": "Finished First Course",
@@ -70,7 +75,7 @@ initial_achievement_data = [
     }
 ]
 
-
+# Course data models 
 class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
@@ -78,13 +83,13 @@ class Course(db.Model):
     description = db.Column(db.Text, nullable=False)
     lessons = db.relationship('Lesson', backref='course', lazy=True, cascade='all, delete-orphan')
 
-
 class Lesson(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     lesson_order = db.Column(db.Integer, nullable=False, default=1)
     course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
 
+# User account data
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -100,26 +105,28 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password, password)
     
-# For achievements and awards tracking
+# Achievements that user can earn
 class Achievement(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(255))
     image_url = db.Column(db.String(255))
 
+# Tracks the achievements that each user has already earned
 class UserAchievement(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     achievement_id = db.Column(db.Integer, db.ForeignKey('achievement.id'), nullable=False)
     earned = db.Column(db.Boolean, default=False)
 
-# For tracking course and lesson progress
+# Tracks whether a user has finished a lesson
 class LessonProgress(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     lesson_id = db.Column(db.Integer, db.ForeignKey('lesson.id'), nullable=False)
     completed = db.Column(db.Boolean, default=False)
 
+# Tracks whether a user has finished a course
 class CourseProgress(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -130,7 +137,7 @@ class CourseProgress(db.Model):
 def load_user(user_id):
     return db.session.get(User, int(user_id))
 
-
+# Seed and setup databases
 def seed_course_data():
     if Course.query.count() > 0:
         return
@@ -170,7 +177,6 @@ def initialize_database():
     seed_course_data()
     seed_achievement_data()
 
-
 def ensure_user_preference_columns():
     inspector = inspect(db.engine)
     existing_columns = {column['name'] for column in inspector.get_columns('user')}
@@ -198,12 +204,12 @@ def init_db():
     initialize_database()
     app.config['DB_INITIALIZED'] = True
 
-
 @app.context_processor
 def inject_courses():
     courses = Course.query.order_by(Course.id).all()
     return {'courses': courses}
 
+# App routes and templates for each one
 @app.route("/")
 def home():
     return render_template("home.html", title="Home", homeActive="active", loggedIn=current_user.is_authenticated)
@@ -219,10 +225,11 @@ def settings():
 @app.route("/awards")
 @login_required
 def awards():
+    # Get all achievements and mark if user has earned each
     achievements = db.session.query(
-        Achievement.id,  # explicitly select id
+        Achievement.id,
         Achievement.name,
-        Achievement.description,  # explicitly select description
+        Achievement.description,
         Achievement.image_url,
         UserAchievement.earned
     ).outerjoin(
@@ -248,12 +255,14 @@ def get_preferences():
 @app.route("/complete-course/<int:course_id>", methods=["POST"])
 @login_required
 def complete_course(course_id):
-
+    # Check if user already has a progress record for this course
     progress = CourseProgress.query.filter_by(
         user_id=current_user.id,
         course_id=course_id
     ).first()
 
+    # If not, create one and mark as completed 
+    # If they do, update it to complete
     if not progress:
         progress = CourseProgress(
             user_id=current_user.id,
@@ -266,6 +275,7 @@ def complete_course(course_id):
 
     achievement = Achievement.query.filter_by(name="Finished First Course").first()
 
+    # If user hasn't already earned "Finished First Course" achievement, award it to them
     if achievement:
         existing = UserAchievement.query.filter_by(
             user_id=current_user.id,
@@ -284,6 +294,7 @@ def complete_course(course_id):
 
     return redirect(url_for("course_detail", course_id=course_id))
 
+# User preferences
 @app.route('/api/preferences', methods=['POST'])
 @login_required
 def save_preferences():
@@ -301,6 +312,7 @@ def save_preferences():
     except (TypeError, ValueError):
         line_spacing = current_user.line_spacing
 
+    # Make sure font size and line spacing are within limit
     font_size = max(12, min(40, font_size))
     line_spacing = max(1.0, min(4.0, line_spacing))
 
@@ -369,6 +381,7 @@ def save_preferences():
 def my_courses():
     courses = Course.query.all()
 
+    # If user is logged in, get their completed courses to show on My Courses page
     if current_user.is_authenticated:
         completed_courses = {
             cp.course_id for cp in CourseProgress.query.filter_by(
@@ -376,6 +389,7 @@ def my_courses():
                 completed=True
             ).all()
         }
+    # If user is not logged in, don't track progress 
     else:
         completed_courses = set()
 
@@ -385,14 +399,17 @@ def my_courses():
         completed_courses=completed_courses,
         loggedIn=current_user.is_authenticated
     )
+
 @app.route("/course/<int:course_id>/")
 def course_detail(course_id):
+    # Get course and its lessons
     course = db.session.get(Course, course_id)
     lessons = Lesson.query.filter_by(course_id=course.id)\
         .order_by(Lesson.lesson_order).all()
 
     progress_percent = 0
 
+    # If user is logged in, calculate how many lessons they've completed to show progress bar on course detail page
     if current_user.is_authenticated:
         completed_lessons = LessonProgress.query.filter_by(
             user_id=current_user.id,
@@ -414,14 +431,17 @@ def course_detail(course_id):
         progress_percent=progress_percent,
         loggedIn=current_user.is_authenticated
     )
+
 @app.route("/complete-lesson/<int:lesson_id>", methods=["POST"])
 @login_required
 def complete_lesson(lesson_id):
+    # Check if user already has a progress record for this lesson
     progress = LessonProgress.query.filter_by(
         user_id=current_user.id,
         lesson_id=lesson_id
     ).first()
 
+    # If not, create one and mark as completed
     if not progress:
         progress = LessonProgress(
             user_id=current_user.id,
@@ -445,10 +465,12 @@ def login():
         password = request.form.get('password')
         
         user = User.query.filter_by(username=username).first()
-        
+
+        # If password is correct, log user in and redirect to home page
         if user and user.check_password(password):
             login_user(user)
             return redirect(url_for('home'))
+        # If not, show error message
         else:
             return render_template('login.html', error='Invalid username or password', loginActive="active", loggedIn=current_user.is_authenticated)
     
@@ -462,15 +484,18 @@ def register():
         password = request.form.get('password')
         password_confirm = request.form.get('password_confirm')
         
+        # Check that passwords match
         if password != password_confirm:
             return render_template('register.html', error='Passwords do not match', registerActive="active", loggedIn=current_user.is_authenticated)
         
+        # Check that username and email are unique
         if User.query.filter_by(username=username).first():
             return render_template('register.html', error='Username already exists', registerActive="active", loggedIn=current_user.is_authenticated)
         
         if User.query.filter_by(email=email).first():
             return render_template('register.html', error='Email already exists', registerActive="active", loggedIn=current_user.is_authenticated)
         
+        # Create new user and hash password
         user = User(username=username, email=email)
         user.set_password(password)
         db.session.add(user)
@@ -546,8 +571,13 @@ def delete_account():
     if not current_user.check_password(password):
         return render_template('settings.html', title="Settings", error='Incorrect password'), 401
     
+    # Delete user and all related data from databases, and log user out
     user_id = current_user.id
     user = db.session.get(User, user_id)
+    CourseProgress.query.filter_by(user_id=current_user.id).delete()
+    LessonProgress.query.filter_by(user_id=current_user.id).delete()
+    UserAchievement.query.filter_by(user_id=current_user.id).delete()
+
     if user:
         db.session.delete(user)
     db.session.commit()
