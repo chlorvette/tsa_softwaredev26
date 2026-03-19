@@ -13,7 +13,7 @@
     <div class="course-main">
         <main class="course-content">
             {% if loggedIn %}
-            <div class="progress text-center mt-4"">
+            <div class="progress text-center mt-4">
                 <div class="progress-bar" role="progressbar"
                     style="width: {{ 100 if course.id in completed_courses else progress_percent }}%;">
                     {{ 100 if course.id in completed_courses else progress_percent }}%
